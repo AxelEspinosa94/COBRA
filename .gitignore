@@ -218,3 +218,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- GnuCOBOL ---
+# Ejecutables y módulos compilados
+bin/*
+!bin/.gitkeep
+*.so
+*.o
+*.dll
+*.exe
+
+# Archivos intermedios de cobc (-save-temps, -t)
+*.c.h
+*.c.l*.h
+*.i
+*.lst
+
+# Archivos generados por el batch
+data/salida/*
+!data/salida/.gitkeep
+*.idx
+*.bak
+*.log

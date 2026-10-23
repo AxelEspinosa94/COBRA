@@ -1,0 +1,21 @@
+# Finales de línea LF en todo el repo (evita problemas entre Windows y WSL)
+* text=auto eol=lf
+
+# COBOL: reconocimiento de lenguaje en GitHub
+*.cbl linguist-language=COBOL
+*.cob linguist-language=COBOL
+*.cpy linguist-language=COBOL
+
+# Scripts de shell siempre con LF, o no corren en Linux
+*.sh  text eol=lf
+
+# Archivos de datos de longitud fija: sin conversión de finales de línea
+# para que las comparaciones contra los golden sean byte a byte
+*.dat -text
+*.txt text eol=lf
+tests/fixtures/** -text
+tests/golden/**   -text
+
+# Los fixtures y golden no cuentan en las estadísticas de lenguajes
+tests/fixtures/** linguist-generated
+tests/golden/**   linguist-generated
