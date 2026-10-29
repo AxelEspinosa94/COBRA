@@ -1,0 +1,17 @@
+{
+  "files.associations": {
+    "*.cpy": "COBOL",
+    "*.cbl": "COBOL",
+    "*.cob": "COBOL"
+  },
+  "[COBOL]": {
+    "editor.rulers": [7, 11, 72],
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "files.trimTrailingWhitespace": true
+  },
+  "[plaintext]": {
+    "files.trimTrailingWhitespace": false
+  },
+  "files.eol": "\n"
+}

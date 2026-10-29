@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Si llega un push nuevo a la misma rama, cancela la corrida anterior
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cobol:
+    name: COBOL (GnuCOBOL 3)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar GnuCOBOL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends gnucobol3 make
+
+      - name: Detección de programas
+        run: make info
+
+      - name: Lint de formato fijo
+        run: make lint
+
+      - name: Compilar
+        run: make
+
+      - name: Pruebas (golden)
+        run: make test
+
+  api:
+    name: API (Python 3.12)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # La API llega en el milestone M4; mientras no exista, el job
+      # pasa sin hacer nada en lugar de fallar.
+      - name: Detectar API
+        id: detectar
+        run: |
+          if [ -f api/requirements.txt ]; then
+            echo "hay=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "hay=false" >> "$GITHUB_OUTPUT"
+            echo "No existe api/requirements.txt; se omiten las pruebas de la API."
+          fi
+
+      - name: Configurar Python
+        if: steps.detectar.outputs.hay == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: api/requirements.txt
+
+      - name: Instalar GnuCOBOL
+        if: steps.detectar.outputs.hay == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends gnucobol3 make
+
+      - name: Compilar núcleo COBOL
+        if: steps.detectar.outputs.hay == 'true'
+        run: make
+
+      - name: Instalar dependencias
+        if: steps.detectar.outputs.hay == 'true'
+        run: pip install -r api/requirements.txt pytest
+
+      - name: Pruebas de la API
+        if: steps.detectar.outputs.hay == 'true'
+        run: pytest -v tests/

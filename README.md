@@ -1,4 +1,6 @@
-# COBRA
+# Proyecto COBRA
+
+[![CI](https://github.com/AxelEspinosa94/COBRA/actions/workflows/ci.yml/badge.svg)](https://github.com/AxelEspinosa94/COBRA/actions/workflows/ci.yml)
 
 **COBOL Batch + REST API**: a COBOL banking batch-processing core, exposed through a modern Python API (FastAPI).
 
@@ -101,9 +103,26 @@ COBRA/
 
 ```bash
 sudo apt update
-sudo apt install -y gnucobol make python3.12 python3.12-venv
+sudo apt install -y gnucobol build-essential make python3.12 python3.12-venv
 cobc --version
 ```
+
+installation check
+
+```bash
+cobc --version
+cobc --info | grep -i indexed
+cat > hola.cbl <<'EOF'
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. HOLA.
+       PROCEDURE DIVISION.
+           DISPLAY "Hola desde COBRA".
+           STOP RUN.
+EOF
+cobc -x hola.cbl && ./hola && rm hola hola.cbl
+```
+
+`--version` should be 3.x.x, the second line should output something like `indexer file handler: BDB`
 
 ---
 
@@ -114,9 +133,19 @@ cobc --version
 ### Build
 
 ```bash
-make            # compiles every program in src/ into bin/
+make            # compiles every program in src/ into bin/ (lint + compilation)
 make clean      # removes binaries and generated files
 ```
+
+### COBOL Makefile test
+
+```bash
+make
+make run
+make test
+```
+
+> To add new subprograms, add it in MODULOS variable in Makefile
 
 ### Generate test data
 
