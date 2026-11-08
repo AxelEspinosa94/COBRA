@@ -7,6 +7,8 @@
 #   make run PROG=X   ejecuta bin/X        (default: DEMO)
 #   make test         compara la salida de cada programa con tests/golden/
 #   make golden PROG=X  guarda la salida actual de X como esperada
+#   make test-py      pruebas de Python (copybooks, codec, generador, interop)
+#   make datos        genera datos de prueba en data/entrada/ (semilla fija)
 #   make clean        borra binarios y temporales
 #   make DEBUG=1      compila con chequeos en tiempo de ejecución (-debug -g)
 #
@@ -54,7 +56,7 @@ BIN_MOD     := $(addprefix $(BIN_DIR)/,$(addsuffix .so,$(MODULOS)))
 
 PROG ?= DEMO
 
-.PHONY: all info lint run test golden clean
+.PHONY: all info lint run test test-py datos golden clean
 
 all: lint $(BIN_MOD) $(BIN_EXE)
 
@@ -104,6 +106,14 @@ golden: all
 	@mkdir -p $(GOLDEN)
 	./$(BIN_DIR)/$(PROG) > $(GOLDEN)/$(PROG).out
 	@echo "golden: $(GOLDEN)/$(PROG).out actualizado"
+
+test-py:
+	python3 -m pytest tests/python -q
+
+# Datos de ejemplo reproducibles (misma semilla y fecha -> mismos bytes)
+datos:
+	python3 scripts/generar_datos.py generar --cuentas 100 --transacciones 1000 \
+		--semilla 42 --fecha-proceso 20261107 --csv
 
 clean:
 	rm -f $(BIN_DIR)/* $(SRC_DIR)/*.c $(SRC_DIR)/*.c.* $(SRC_DIR)/*.i $(SRC_DIR)/*.lst
