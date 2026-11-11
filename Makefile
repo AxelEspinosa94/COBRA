@@ -9,6 +9,7 @@
 #   make golden PROG=X  guarda la salida actual de X como esperada
 #   make test-py      pruebas de Python (copybooks, codec, generador, interop)
 #   make datos        genera datos de prueba en data/entrada/ (semilla fija)
+#   make maestro      carga data/entrada/cuentas.dat al maestro indexado
 #   make clean        borra binarios y temporales
 #   make DEBUG=1      compila con chequeos en tiempo de ejecución (-debug -g)
 #
@@ -56,7 +57,7 @@ BIN_MOD     := $(addprefix $(BIN_DIR)/,$(addsuffix .so,$(MODULOS)))
 
 PROG ?= DEMO
 
-.PHONY: all info lint run test test-py datos golden clean
+.PHONY: all info lint run test test-py datos maestro golden clean
 
 all: lint $(BIN_MOD) $(BIN_EXE)
 
@@ -114,6 +115,12 @@ test-py:
 datos:
 	python3 scripts/generar_datos.py generar --cuentas 100 --transacciones 1000 \
 		--semilla 42 --fecha-proceso 20261107 --csv
+
+# Carga inicial del maestro. RC 4 (hubo rechazos) no se trata como fallo.
+maestro: all
+	@mkdir -p data/salida
+	@DD_CUENTAS=data/entrada/cuentas.dat DD_MAESTRO=data/salida/maestro.idx \
+		./$(BIN_DIR)/CARGACTA; rc=$$?; [ $$rc -le 4 ] || exit $$rc
 
 clean:
 	rm -f $(BIN_DIR)/* $(SRC_DIR)/*.c $(SRC_DIR)/*.c.* $(SRC_DIR)/*.i $(SRC_DIR)/*.lst
